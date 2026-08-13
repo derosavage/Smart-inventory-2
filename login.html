@@ -27,9 +27,11 @@
     </div>
 
     <script>
+        const API_BASE_URL = 'http://127.0.0.1:8888';
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const alertDiv = document.getElementById('alert');
@@ -45,7 +47,7 @@
             }
 
             try {
-                const response = await fetch('/auth/login', {   // ✅ RELATIVE URL
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

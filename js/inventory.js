@@ -1,3 +1,4 @@
+const API_BASE = "http://127.0.0.1:8888";
 const token = localStorage.getItem('access_token');
 if (!token) window.location.href = 'login.html';
 
@@ -47,7 +48,7 @@ document.getElementById('receiptFormElement').addEventListener('submit', async f
     alertDiv.className = 'alert';
 
     try {
-        const response = await fetch('/inventory/receipt', {
+        const response = await fetch(`${API_BASE}/inventory/receipt`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ document.getElementById('adjustFormElement').addEventListener('submit', async fu
     alertDiv.className = 'alert';
 
     try {
-        const response = await fetch('/inventory/adjust', {
+        const response = await fetch(`${API_BASE}/inventory/adjust`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

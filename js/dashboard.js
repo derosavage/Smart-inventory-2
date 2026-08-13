@@ -1,5 +1,6 @@
 // frontend/js/dashboard.js
 
+const API_BASE = "http://127.0.0.1:8888";
 let topProductsChart = null;
 
 // ---------- INIT ----------
@@ -51,7 +52,7 @@ document.getElementById('logoutLink').addEventListener('click', function(e) {
 async function loadDashboardSummary() {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/dashboard/summary', {
+        const response = await fetch(`${API_BASE}/dashboard/summary`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load summary');
@@ -73,7 +74,7 @@ async function loadLowStockAlerts() {
     const lowStockList = document.getElementById('lowStockList');
     
     try {
-        const response = await fetch('/dashboard/low-stock', {
+        const response = await fetch(`${API_BASE}/dashboard/low-stock`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load low stock alerts');
@@ -109,7 +110,7 @@ async function loadLowStockAlerts() {
 async function loadDailySales() {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/dashboard/daily-sales', {
+        const response = await fetch(`${API_BASE}/dashboard/daily-sales`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load daily sales');
@@ -134,7 +135,7 @@ async function loadDailySales() {
 async function loadTopProducts() {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/dashboard/product-performance', {
+        const response = await fetch(`${API_BASE}/dashboard/product-performance`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load product performance');

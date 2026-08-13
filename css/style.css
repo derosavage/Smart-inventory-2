@@ -117,12 +117,16 @@ body {
     background: #343a40;
     color: white;
     padding: 1rem;
+    display: flex;
+    align-items: center;
+    z-index: 998;
 }
 
 .navbar .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .navbar-brand {
@@ -148,6 +152,117 @@ body {
 
 .navbar-menu a:hover {
     color: #17a2b8;
+}
+
+.hamburger-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: none;
+}
+
+/* Sidebar */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+.sidebar-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: #2c3e50;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+}
+
+.sidebar-menu.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: #1a252f;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.sidebar-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 14px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: #34495e;
+    color: white;
+}
+
+.sidebar-nav .sidebar-section {
+    padding: 10px 20px 6px;
+    color: #95a5a6;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    display: block;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .navbar-menu {
+        display: none !important;
+    }
+    .hamburger-btn {
+        display: block;
+    }
 }
 
 /* Dashboard cards */

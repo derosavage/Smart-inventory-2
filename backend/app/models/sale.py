@@ -3,21 +3,41 @@ from typing import List, Dict, Optional
 from datetime import datetime
 import json
 
+
 def create_sale(
     conn: MySQLConnection,
     transaction_number: str,
     user_id: int,
     transaction_date: datetime,
-    items: List[Dict]
+    items: List[Dict],
+    branch_id: Optional[int] = None,
+    tax_type: str = "standard",
+    tax_amount: float = 0.0,
+    notes: Optional[str] = None,
 ) -> int:
-    """Call the ProcessSale stored procedure."""
+    """Call the ProcessSale stored procedure.
+
+    Args:
+        conn: Database connection
+        transaction_number: Unique receipt/invoice number
+        user_id: ID of the cashier processing the sale
+        transaction_date: Date of the transaction
+        items: List of sale items with sku, quantity, unit_price
+        branch_id: Branch ID for multi-branch support
+        tax_type: 'standard' (VAT) or 'non-tax' (KRA exempt)
+        tax_amount: Total tax charged for the transaction
+        notes: Optional notes for the receipt (e.g., ETR number, payment method)
+    """
     cursor = conn.cursor()
-    
+
     # Convert items list to JSON string as expected by the procedure
     items_json = json.dumps(items)
-    
-    cursor.callproc("ProcessSale", (transaction_number, user_id, transaction_date, items_json))
-    
+
+    cursor.callproc(
+        "ProcessSale",
+        (transaction_number, user_id, transaction_date, items_json),
+    )
+
     # Fetch the result (transaction_id)
     result = cursor.stored_results()
     transaction_id = None
@@ -25,7 +45,18 @@ def create_sale(
         row = res.fetchone()
         if row:
             transaction_id = row[0]
-    
+
+    # Update the transaction with tax and branch info
+    if transaction_id:
+        cursor.execute(
+            """
+            UPDATE sale_transactions
+            SET tax_type = %s, tax_amount = %s, branch_id = %s, notes = %s
+            WHERE id = %s
+            """,
+            (tax_type, tax_amount, branch_id, notes, transaction_id),
+        )
+
     conn.commit()
     cursor.close()
     return transaction_id

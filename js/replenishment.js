@@ -1,6 +1,7 @@
 // frontend/js/replenishment.js
 
 // ---------- AUTH CHECK – MANAGER/ADMIN ONLY ----------
+const API_BASE = "http://127.0.0.1:8888";
 (async function() {
     const user = await checkAuth(['manager', 'admin']);
     if (!user) return;
@@ -36,7 +37,7 @@ document.getElementById('generateBtn').addEventListener('click', async function(
     const token = localStorage.getItem('access_token');
     
     try {
-        const response = await fetch(`/replenishment/generate?lookback_days=${lookback}&forecast_days=${forecast}&safety_stock_factor=${safety}`, {
+        const response = await fetch(`${API_BASE}/replenishment/generate?lookback_days=${lookback}&forecast_days=${forecast}&safety_stock_factor=${safety}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -66,7 +67,7 @@ async function loadSuggestions(active = true) {
     const listDiv = document.getElementById('suggestionsList');
     
     try {
-        const response = await fetch(`/replenishment/suggestions?active_only=${active}&limit=100`, {
+        const response = await fetch(`${API_BASE}/replenishment/suggestions?active_only=${active}&limit=100`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -122,7 +123,7 @@ async function loadSuggestions(active = true) {
 window.acceptSuggestion = async function(suggestionId) {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/replenishment/actions', {
+        const response = await fetch(`${API_BASE}/replenishment/actions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -153,7 +154,7 @@ window.ignoreSuggestion = async function(suggestionId) {
     
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/replenishment/actions', {
+        const response = await fetch(`${API_BASE}/replenishment/actions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

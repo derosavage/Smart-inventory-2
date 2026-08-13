@@ -1,6 +1,7 @@
 // frontend/js/reports.js
 
 // ---------- GLOBAL STATE ----------
+const API_BASE = "http://127.0.0.1:8888";
 let currentReport = 'sales';
 let chartInstance = null;
 let filterOptions = {
@@ -52,13 +53,13 @@ async function loadFilterOptions() {
     const token = localStorage.getItem('access_token');
     try {
         // Products
-        const prodRes = await fetch('/reports/filter-options/products', {
+        const prodRes = await fetch(`${API_BASE}/reports/filter-options/products`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (prodRes.ok) filterOptions.products = await prodRes.json();
 
         // Movement types
-        const mtRes = await fetch('/reports/filter-options/movement-types', {
+        const mtRes = await fetch(`${API_BASE}/reports/filter-options/movement-types`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (mtRes.ok) filterOptions.movementTypes = await mtRes.json();
@@ -140,6 +141,42 @@ function updateFilterPanel(reportType) {
             </div>
             <button id="applyFilters" class="btn btn-primary">Apply</button>
         `;
+    } else if (reportType === 'profit-loss') {
+        const today = new Date().toISOString().split('T')[0];
+        const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        html = `
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" id="fromDate" value="${lastMonth}">
+            </div>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" id="toDate" value="${today}">
+            </div>
+            <button id="applyFilters" class="btn btn-primary">Apply</button>
+        `;
+    } else if (reportType === 'daily') {
+        html = `
+            <div class="filter-group">
+                <label>Report Date</label>
+                <input type="date" id="reportDate" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <button id="applyFilters" class="btn btn-primary">Apply</button>
+        `;
+    } else if (reportType === 'commissions') {
+        const today = new Date().toISOString().split('T')[0];
+        const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        html = `
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" id="fromDate" value="${lastMonth}">
+            </div>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" id="toDate" value="${today}">
+            </div>
+            <button id="applyFilters" class="btn btn-primary">Apply</button>
+        `;
     }
 
     panel.innerHTML = html;
@@ -150,7 +187,6 @@ function updateFilterPanel(reportType) {
 async function loadReportData() {
     const token = localStorage.getItem('access_token');
     let url = '';
-    let params = {};
 
     if (currentReport === 'sales') {
         const fromDate = document.getElementById('fromDate')?.value;
@@ -173,6 +209,19 @@ async function loadReportData() {
         const sortBy = document.getElementById('sortBy')?.value || 'total_sold_30d';
         const limit = document.getElementById('limit')?.value || 50;
         url = `/reports/product-performance?sort_by=${sortBy}&limit=${limit}`;
+    } else if (currentReport === 'profit-loss') {
+        const fromDate = document.getElementById('fromDate')?.value;
+        const toDate = document.getElementById('toDate')?.value;
+        if (!fromDate || !toDate) return;
+        url = `/reports/profit-loss?from_date=${fromDate}&to_date=${toDate}`;
+    } else if (currentReport === 'daily') {
+        const reportDate = document.getElementById('reportDate')?.value || new Date().toISOString().split('T')[0];
+        url = `/reports/daily-business?target_date=${reportDate}`;
+    } else if (currentReport === 'commissions') {
+        const fromDate = document.getElementById('fromDate')?.value;
+        const toDate = document.getElementById('toDate')?.value;
+        if (!fromDate || !toDate) return;
+        url = `/commission/rules?from_date=${fromDate}&to_date=${toDate}`;
     }
 
     try {
@@ -181,7 +230,7 @@ async function loadReportData() {
         });
         if (!response.ok) throw new Error('Failed to load report');
         const data = await response.json();
-        renderReportTable(data);
+        renderReportTable(Array.isArray(data) ? data : [data]);
         renderChart(data);
     } catch (error) {
         console.error(error);
@@ -280,6 +329,70 @@ function renderChart(data) {
                 label: 'Units Sold (30 days)',
                 data: chartValues,
                 backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6610f2']
+            }]
+        };
+    } else if (currentReport === 'profit-loss') {
+        if (typeof data === 'object' && !Array.isArray(data)) {
+            chartType = 'bar';
+            chartLabels = ['Revenue', 'COGS', 'Gross Profit', 'Expenses', 'Net Profit'];
+            chartValues = [data.total_revenue, data.total_cogs, data.gross_profit, data.total_expenses, data.net_profit];
+            chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Amount (Ksh)',
+                    data: chartValues,
+                    backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1']
+                }]
+            };
+        } else {
+            chartType = 'bar';
+            chartLabels = data.map(d => d.period || d.date || '');
+            chartValues = data.map(d => d.total_revenue || d.revenue || 0);
+            chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Revenue (Ksh)',
+                    data: chartValues,
+                    backgroundColor: '#28a745'
+                }]
+            };
+        }
+    } else if (currentReport === 'daily') {
+        if (typeof data === 'object' && !Array.isArray(data)) {
+            chartType = 'bar';
+            chartLabels = ['Transactions', 'Items Sold'];
+            chartValues = [data.transaction_count || 0, data.total_items_sold || 0];
+            chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Count',
+                    data: chartValues,
+                    backgroundColor: ['#007bff', '#28a745']
+                }]
+            };
+        } else {
+            chartType = 'bar';
+            chartLabels = data.map(d => d.period || d.date || '');
+            chartValues = data.map(d => d.total_revenue || d.revenue || 0);
+            chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Revenue (Ksh)',
+                    data: chartValues,
+                    backgroundColor: '#007bff'
+                }]
+            };
+        }
+    } else if (currentReport === 'commissions') {
+        chartType = 'bar';
+        chartLabels = data.map(d => d.staff || d.name || d.user || '');
+        chartValues = data.map(d => d.commission_amount || d.total_commission || d.amount || 0);
+        chartData = {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Commission (Ksh)',
+                data: chartValues,
+                backgroundColor: '#17a2b8'
             }]
         };
     }

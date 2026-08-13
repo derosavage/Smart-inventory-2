@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel
 
 # ---------- Sales Report ----------
@@ -14,6 +14,7 @@ class SalesReportItem(BaseModel):
     transaction_count: int
     items_sold: int
     revenue: Decimal
+    tax_collected: Optional[Decimal] = None
 
 # ---------- Stock Movement Report ----------
 class StockMovementFilter(BaseModel):
@@ -48,3 +49,24 @@ class ProductPerformanceItem(BaseModel):
     avg_daily_sales: float
     turnover_rate: Optional[float]  # (total_sold_30d / current_stock) if stock>0
     status: str
+
+# ---------- Profit & Loss Report ----------
+class ProfitLossReport(BaseModel):
+    from_date: str
+    to_date: str
+    total_revenue: float
+    total_cogs: float
+    gross_profit: float
+    total_expenses: float
+    net_profit: float
+    total_items_sold: int
+    total_tax_collected: float
+
+# ---------- Daily Business Report ----------
+class DailyBusinessReport(BaseModel):
+    date: str
+    sales: dict
+    top_product: Optional[dict] = None
+    movements: dict
+    low_stock_count: int
+    out_of_stock_count: int

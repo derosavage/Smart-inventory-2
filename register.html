@@ -39,20 +39,20 @@
     </div>
 
     <script>
+        const API_BASE_URL = 'http://127.0.0.1:8888';
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const role = document.getElementById('role').value;
             const alertDiv = document.getElementById('alert');
 
-            // Reset alert
             alertDiv.style.display = 'none';
             alertDiv.className = 'alert';
 
-            // Validation
             if (!username || !email || !password || !role) {
                 alertDiv.style.display = 'block';
                 alertDiv.className = 'alert alert-error';
@@ -61,17 +61,17 @@
             }
 
             try {
-                const response = await fetch('/auth/register', {  // ← RELATIVE URL WORKS
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        username: username,
-                        email: email,
-                        password: password,
-                        role: role
+                        username,
+                        email,
+                        password,
+                        role
                     })
                 });
 
@@ -80,7 +80,7 @@
                 if (response.ok) {
                     alertDiv.style.display = 'block';
                     alertDiv.className = 'alert alert-success';
-                    alertDiv.textContent = '✅ Registration successful! Redirecting to login...';
+                    alertDiv.textContent = 'Registration successful! Redirecting to login...';
                     setTimeout(() => window.location.href = 'login.html', 2000);
                 } else {
                     alertDiv.style.display = 'block';

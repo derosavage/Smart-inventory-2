@@ -51,7 +51,11 @@ def create_sale(
             sale.transaction_number,
             current_user["id"],
             sale.transaction_date,
-            items_data
+            items_data,
+            branch_id=sale.branch_id,
+            tax_type=sale.tax_type,
+            tax_amount=float(sale.tax_amount),
+            notes=sale.notes,
         )
         
         # Fetch the complete transaction with items

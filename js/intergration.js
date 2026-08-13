@@ -1,6 +1,7 @@
 // frontend/js/integration.js
 
 // ---------- AUTH CHECK – MANAGER/ADMIN ONLY ----------
+const API_BASE = "http://127.0.0.1:8888";
 (async function() {
     const user = await checkAuth(['manager', 'admin']);
     if (!user) return;
@@ -30,7 +31,7 @@ async function loadApiKeys() {
     const token = localStorage.getItem('access_token');
     const listDiv = document.getElementById('apiKeysList');
     try {
-        const response = await fetch('/integration/api-keys', {
+        const response = await fetch(`${API_BASE}/intergration/api-keys`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load API keys');
@@ -84,7 +85,7 @@ document.getElementById('saveApiKeyBtn').addEventListener('click', async () => {
     }
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/integration/api-keys', {
+        const response = await fetch(`${API_BASE}/intergration/api-keys`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -115,7 +116,7 @@ window.regenerateApiKey = async function(id) {
     if (!confirm('Regenerate API key? The old key will stop working immediately.')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch(`/integration/api-keys/${id}/regenerate`, {
+        const response = await fetch(`${API_BASE}/intergration/api-keys/${id}/regenerate`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -135,7 +136,7 @@ window.revokeApiKey = async function(id) {
     if (!confirm('Revoke this API key? It will no longer work.')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch(`/integration/api-keys/${id}`, {
+        const response = await fetch(`${API_BASE}/intergration/api-keys/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -157,7 +158,7 @@ async function loadWebhooks() {
     const token = localStorage.getItem('access_token');
     const listDiv = document.getElementById('webhooksList');
     try {
-        const response = await fetch('/integration/webhooks', {
+        const response = await fetch(`${API_BASE}/intergration/webhooks`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to load webhooks');
@@ -228,7 +229,7 @@ document.getElementById('cancelWebhookBtn').addEventListener('click', () => {
 window.editWebhook = async function(id) {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch(`/integration/webhooks/${id}`, {
+        const response = await fetch(`${API_BASE}/intergration/webhooks/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch');
@@ -243,7 +244,7 @@ window.deleteWebhook = async function(id) {
     if (!confirm('Delete this webhook?')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch(`/integration/webhooks/${id}`, {
+        const response = await fetch(`${API_BASE}/intergration/webhooks/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -277,7 +278,7 @@ document.getElementById('saveWebhookBtn').addEventListener('click', async () => 
 
     const token = localStorage.getItem('access_token');
     const method = editingWebhookId ? 'PUT' : 'POST';
-    const urlPath = editingWebhookId ? `/integration/webhooks/${editingWebhookId}` : '/integration/webhooks';
+    const urlPath = editingWebhookId ? `/intergration/webhooks/${editingWebhookId}` : '/intergration/webhooks';
 
     try {
         const response = await fetch(urlPath, {
@@ -313,7 +314,7 @@ document.getElementById('saveWebhookBtn').addEventListener('click', async () => 
 async function loadStatus() {
     const token = localStorage.getItem('access_token');
     try {
-        const response = await fetch('/integration/status', {
+        const response = await fetch(`${API_BASE}/intergration/status`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error();
@@ -331,7 +332,7 @@ async function loadDeliveries() {
     const token = localStorage.getItem('access_token');
     const listDiv = document.getElementById('deliveriesList');
     try {
-        const response = await fetch('/integration/status');  // same endpoint includes recent deliveries
+        const response = await fetch(`${API_BASE}/intergration/status`);  // same endpoint includes recent deliveries
         if (!response.ok) throw new Error();
         const status = await response.json();
         const deliveries = status.recent_deliveries || [];

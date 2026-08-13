@@ -9,6 +9,8 @@ from .api.routes import replenishment
 from .api.routes import reports
 from .api.routes import integration
 from .api.routes import admin
+from .api.routes import branch
+from .api.routes import commission
 
 
 
@@ -57,6 +59,8 @@ app.include_router(replenishment.router)
 app.include_router(reports.router)
 app.include_router(integration.router)
 app.include_router(admin.router)
+app.include_router(branch.router)
+app.include_router(commission.router)
 
 
 # ----------------------------------------------------------------------

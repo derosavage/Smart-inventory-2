@@ -472,7 +472,8 @@ SELECT
     COUNT(DISTINCT st.id) AS transaction_count,
     COUNT(DISTINCT sli.product_sku) AS unique_products_sold,
     SUM(sli.quantity) AS total_items_sold,
-    SUM(st.total_amount) AS total_revenue
+    SUM(st.total_amount) AS total_revenue,
+    SUM(st.tax_amount) AS tax_collected
 FROM sale_transactions st
 JOIN sale_line_items sli ON st.id = sli.transaction_id
 GROUP BY st.transaction_date
@@ -543,6 +544,62 @@ CREATE INDEX idx_stock_movements_composite ON stock_movements(product_sku, creat
 CREATE INDEX idx_sale_line_items_product ON sale_line_items(product_sku);
 CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_products_supplier ON products(supplier_id);
+CREATE INDEX idx_sale_transactions_branch ON sale_transactions(branch_id);
+CREATE INDEX idx_sale_transactions_tax ON sale_transactions(tax_type);
+CREATE INDEX idx_commission_rules_active ON commission_rules(is_active);
+CREATE INDEX idx_user_branches_user ON user_branches(user_id);
+
+-- =============================================================================
+-- NEW TABLES FOR POS FEATURES
+-- =============================================================================
+
+-- Multi-branch support
+CREATE TABLE branches (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    address TEXT,
+    phone VARCHAR(20),
+    email VARCHAR(120),
+    created_by INT UNSIGNED,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- User-branch assignment (many-to-many)
+CREATE TABLE user_branches (
+    user_id INT UNSIGNED NOT NULL,
+    branch_id INT UNSIGNED NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, branch_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Commission rules (service and product commissions)
+CREATE TABLE commission_rules (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    commission_type ENUM('percentage', 'fixed') NOT NULL DEFAULT 'percentage',
+    rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    target_type ENUM('staff', 'product', 'category') NOT NULL,
+    target_id INT UNSIGNED DEFAULT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_by INT UNSIGNED,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Update sale_transactions table to add tax and branch support
+ALTER TABLE sale_transactions
+    ADD COLUMN tax_type VARCHAR(20) NOT NULL DEFAULT 'standard' AFTER transaction_date,
+    ADD COLUMN tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER tax_type,
+    ADD COLUMN branch_id INT UNSIGNED DEFAULT NULL AFTER tax_amount,
+    ADD COLUMN notes TEXT AFTER branch_id,
+    ADD FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE SET NULL;
 
 -- =============================================================================
 -- END OF SCHEMA – NO SAMPLE DATA INSERTED

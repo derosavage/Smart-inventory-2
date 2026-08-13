@@ -1,6 +1,7 @@
 // frontend/js/admin.js
 
 // ---------- AUTH CHECK – ADMIN ONLY ----------
+const API_BASE = "http://127.0.0.1:8888";
 (async function() {
     const user = await checkAuth(['admin']); // strict admin only
     if (!user) return;
@@ -62,7 +63,7 @@ async function loadUsers() {
     const token = localStorage.getItem('access_token');
     const tbody = document.getElementById('usersList');
     try {
-        const res = await fetch('/admin/users', {
+        const res = await fetch(`${API_BASE}/admin/users`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed');
@@ -166,7 +167,7 @@ document.getElementById('saveUserBtn').addEventListener('click', async () => {
 window.editUser = async function(id) {
     const token = localStorage.getItem('access_token');
     try {
-        const res = await fetch(`/admin/users/${id}`, {
+        const res = await fetch(`${API_BASE}/admin/users/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error();
@@ -181,7 +182,7 @@ window.deleteUser = async function(id) {
     if (!confirm('Delete this user? They will be deactivated.')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const res = await fetch(`/admin/users/${id}`, {
+        const res = await fetch(`${API_BASE}/admin/users/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -202,7 +203,7 @@ async function loadSettings() {
     const token = localStorage.getItem('access_token');
     const tbody = document.getElementById('settingsList');
     try {
-        const res = await fetch('/admin/settings', {
+        const res = await fetch(`${API_BASE}/admin/settings`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error();
@@ -235,7 +236,7 @@ window.updateSetting = async function(key) {
     const value = document.getElementById(`set_${key}`).value.trim();
     const token = localStorage.getItem('access_token');
     try {
-        const res = await fetch(`/admin/settings/${key}`, {
+        const res = await fetch(`${API_BASE}/admin/settings/${key}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -261,7 +262,7 @@ async function loadCategories() {
     const token = localStorage.getItem('access_token');
     const tbody = document.getElementById('categoriesList');
     try {
-        const res = await fetch('/admin/categories', {
+        const res = await fetch(`${API_BASE}/admin/categories`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error();
@@ -352,7 +353,7 @@ window.deleteCategory = async function(id) {
     if (!confirm('Delete this category? Cannot delete if used by products.')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const res = await fetch(`/admin/categories/${id}`, {
+        const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -375,7 +376,7 @@ async function loadMovementTypes() {
     const token = localStorage.getItem('access_token');
     const tbody = document.getElementById('movementTypesList');
     try {
-        const res = await fetch('/admin/movement-types', {
+        const res = await fetch(`${API_BASE}/admin/movement-types`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error();
@@ -469,7 +470,7 @@ window.deleteMovementType = async function(id) {
     if (!confirm('Delete this movement type? Cannot delete if used in stock movements.')) return;
     const token = localStorage.getItem('access_token');
     try {
-        const res = await fetch(`/admin/movement-types/${id}`, {
+        const res = await fetch(`${API_BASE}/admin/movement-types/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

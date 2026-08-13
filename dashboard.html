@@ -3,81 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Smart Inventory</title>
+    <title>Dashboard - Meet D Modern POS</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- Chart.js for simple charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .metric-value {
-            font-size: 36px;
-            font-weight: bold;
-            color: #007bff;
-            margin: 10px 0;
-        }
-        .metric-label {
-            color: #6c757d;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-        .alert-card {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-        }
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        .low-stock-table {
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
         }
-        .low-stock-table td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
+        .sidebar-overlay.active {
+            display: block;
         }
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
+        .sidebar-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
         }
-        .badge-danger {
-            background: #dc3545;
+        .sidebar-menu.active {
+            left: 0;
+        }
+        .sidebar-header {
+            padding: 20px;
+            background: #1a252f;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 14px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #34495e;
             color: white;
         }
-        .badge-warning {
-            background: #ffc107;
-            color: black;
+        .sidebar-nav .sidebar-section {
+            padding: 10px 20px 6px;
+            color: #95a5a6;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        .sidebar-nav .dropdown-arrow {
+            float: right;
+            margin-top: 2px;
+        }
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            display: block;
+        }
+        .main-content.shifted {
+            margin-left: 0;
+        }
+        @media (min-width: 769px) {
+            .navbar-menu {
+                display: flex !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .navbar-menu {
+                display: none !important;
+            }
+            .hamburger-btn {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Sidebar overlay background -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar menu popup -->
+    <div class="sidebar-menu" id="sidebarMenu">
+        <div class="sidebar-header">
+            <h3>📊 Meet D POS</h3>
+            <button class="sidebar-close" id="sidebarClose">&times;</button>
+        </div>
+        <ul class="sidebar-nav">
+            <li><span class="sidebar-section">Main</span></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="sales.html">🛒 Sales</a></li>
+            <li><a href="products.html">📦 Products</a></li>
+            <li><a href="inventory.html">📋 Inventory</a></li>
+            <li><span class="sidebar-section">Operations</span></li>
+            <li><a href="replenishment.html">🔄 Replenishment</a></li>
+            <li><a href="reports.html">📈 Reports</a></li>
+            <li><span class="sidebar-section">Analytics</span></li>
+            <li><a href="reports.html">📊 Profit & Loss</a></li>
+            <li><a href="reports.html">📅 Daily Reports</a></li>
+            <li><a href="reports.html">💰 Commissions</a></li>
+            <li><span class="sidebar-section">Management</span></li>
+            <li><a href="admin.html">👥 Staff</a></li>
+            <li><a href="admin.html">🏢 Branches</a></li>
+            <li><a href="admin.html">⚙️ Settings</a></li>
+            <li><span class="sidebar-section">Integration</span></li>
+            <li><a href="intergration.html">📧 Email & WhatsApp</a></li>
+            <li><a href="intergration.html#api-keys">🔑 API Keys</a></li>
+            <li><span class="sidebar-section">Account</span></li>
+            <li><a href="#" id="sidebarLogoutLink">🚪 Logout</a></li>
+        </ul>
+    </div>
+
     <nav class="navbar">
         <div class="container">
-            <a href="dashboard.html" class="navbar-brand">Smart Inventory</a>
-            <ul class="navbar-menu">
+            <div style="display: flex; align-items: center;">
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">☰</button>
+                <a href="dashboard.html" class="navbar-brand">Meet D POS</a>
+            </div>
+            <ul class="navbar-menu" id="navbarMenu">
                 <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="sales.html">Sales</a></li>
                 <li><a href="products.html">Products</a></li>
                 <li><a href="inventory.html">Inventory</a></li>
-                <li><a href="replenishment.html">Replenishment</a></li>
-                <li><a href="sales.html">Sales</a></li>
                 <li><a href="reports.html">Reports</a></li>
                 <li><a href="#" id="logoutLink">Logout</a></li>
             </ul>
@@ -152,6 +236,41 @@
     <script>
         const inventoryLink = document.querySelector('a[href="inventory.html"]');
         if (inventoryLink) inventoryLink.style.display = isManager ? 'block' : 'none';
+
+        // Sidebar toggle logic
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function openSidebar() {
+            sidebarMenu.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebarMenu.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', openSidebar);
+        }
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', closeSidebar);
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+
+        // Sync logout between sidebar and navbar
+        const sidebarLogout = document.getElementById('sidebarLogoutLink');
+        if (sidebarLogout) {
+            sidebarLogout.addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        }
     </script>
     <script src="js/dashboard.js"></script>
 </body>

@@ -6,11 +6,12 @@ from datetime import date
 from ...schemas.report import (
     SalesReportFilter, SalesReportItem,
     StockMovementFilter, StockMovementReportItem,
-    ProductPerformanceFilter, ProductPerformanceItem
+    ProductPerformanceFilter, ProductPerformanceItem,
+    ProfitLossReport, DailyBusinessReport,
 )
 from ...models import report as report_model
 from ...core.database import get_db
-from ...api.dependencies import get_current_user
+from ...api.dependencies import get_current_user, get_current_active_manager
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
@@ -67,3 +68,30 @@ def get_products(
 ):
     """Get list of products (sku + name) for filter dropdown."""
     return report_model.get_distinct_product_skus(conn)
+
+
+# ---------- Profit & Loss ----------
+@router.get("/profit-loss", response_model=ProfitLossReport)
+def get_profit_loss_report(
+    from_date: date,
+    to_date: date,
+    branch_id: Optional[int] = Query(None, description="Filter by branch"),
+    conn: MySQLConnection = Depends(get_db),
+    current_user = Depends(get_current_active_manager),
+):
+    """Generate a profit and loss report for a date range."""
+    if from_date > to_date:
+        raise HTTPException(status_code=400, detail="from_date must be before to_date")
+    return report_model.get_profit_loss_report(conn, from_date, to_date, branch_id)
+
+
+# ---------- Daily Business Report ----------
+@router.get("/daily-business", response_model=DailyBusinessReport)
+def get_daily_business_report(
+    target_date: date = Query(default_factory=lambda: date.today()),
+    branch_id: Optional[int] = Query(None, description="Filter by branch"),
+    conn: MySQLConnection = Depends(get_db),
+    current_user = Depends(get_current_active_manager),
+):
+    """Get a comprehensive daily business snapshot for real-time tracking."""
+    return report_model.get_daily_business_report(conn, target_date, branch_id)

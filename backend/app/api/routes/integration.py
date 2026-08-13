@@ -10,7 +10,7 @@ from ...schemas.integration import IntegrationStatus
 from ...models import integration as integration_model
 from ...models import product, stock_movement, sale
 from ...core.database import get_db
-from ..dependencies import get_current_active_manager
+from ...api.dependencies import get_current_active_manager
 
 router = APIRouter(prefix="/intergration", tags=["intergration"])
 

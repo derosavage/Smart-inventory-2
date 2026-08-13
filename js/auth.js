@@ -1,6 +1,6 @@
 // auth.js – role-based redirects
 
-const API_BASE = '';  // relative URLs
+const API_BASE = 'http://127.0.0.1:8888';
 
 async function checkAuth(allowedRoles = ['manager', 'admin']) {
     const token = localStorage.getItem('access_token');

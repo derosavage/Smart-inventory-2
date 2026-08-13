@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.mysql-local/
+backend/.env
+backend/uvicorn*.log
+backend_server.log
+backend_stderr.log
+*.log
