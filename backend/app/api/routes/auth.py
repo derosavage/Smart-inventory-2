@@ -3,7 +3,7 @@ from mysql.connector import MySQLConnection
 from datetime import timedelta
 
 from ...schemas.user import UserCreate, UserLogin, Token, UserResponse
-from ...models.user import create_user, get_user_by_username, get_user_by_id
+from ...models.user import create_user, get_user_by_username, get_user_by_email, get_user_by_id
 from ...core.database import get_db
 from ...core.security import verify_password, create_access_token
 from ...core.config import settings
@@ -17,11 +17,20 @@ def register(user: UserCreate, conn: MySQLConnection = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Username already registered")
     
+    existing_email = get_user_by_email(conn, user.email)
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     try:
         user_id = create_user(conn, user.model_dump())
         new_user = get_user_by_id(conn, user_id)
         return UserResponse(**new_user)
     except Exception as e:
+        error_msg = str(e).lower()
+        if "unique constraint" in error_msg and "email" in error_msg:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        if "unique constraint" in error_msg and "username" in error_msg:
+            raise HTTPException(status_code=400, detail="Username already registered")
         raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 @router.post("/login", response_model=Token)

@@ -64,6 +64,23 @@ def get_user_by_username(conn: MySQLConnection, username: str) -> Optional[Dict]
     cursor.close()
     return user
 
+
+def get_user_by_email(conn: MySQLConnection, email: str) -> Optional[Dict]:
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT u.id, u.username, u.email, u.password_hash, u.is_active,
+               GROUP_CONCAT(r.name) as roles
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE LOWER(u.email) = LOWER(%s)
+        GROUP BY u.id
+    """
+    cursor.execute(query, (email,))
+    user = cursor.fetchone()
+    cursor.close()
+    return user
+
 def get_user_by_id(conn: MySQLConnection, user_id: int) -> Optional[Dict]:
     cursor = conn.cursor(dictionary=True)
     query = """
